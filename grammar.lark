@@ -1,0 +1,28 @@
+notation : 
+| addition
+| subtraction
+| multiplication
+| fudge
+| dice
+| number
+| "(" notation ")"
+
+addition:  notation "+" notation
+
+subtraction:  notation "-" notation
+
+multiplication : notation "*" notation
+
+dice :  notation DSEPARATOR notation
+
+fudge: notation "fudge"
+
+DSEPARATOR: "d" | "D"
+
+number: SIGNED_NUMBER
+
+
+%import common.ESCAPED_STRING
+%import common.SIGNED_NUMBER
+%import common.WS
+%ignore WS

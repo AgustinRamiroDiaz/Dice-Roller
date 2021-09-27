@@ -1,26 +1,27 @@
-notation : 
+dice_notation : 
 | addition
 | subtraction
 | multiplication
+| divition
 | fudge
 | dice
-| number
-| "(" notation ")"
+| SIGNED_NUMBER -> number
+| "(" dice_notation ")"
+| expected_value
 
-addition:  notation "+" notation
+addition:  dice_notation "+" dice_notation
 
-subtraction:  notation "-" notation
+subtraction:  dice_notation "-" dice_notation
 
-multiplication : notation "*" notation
+multiplication : dice_notation "*" dice_notation
 
-dice :  notation DSEPARATOR notation
+divition : dice_notation "/" dice_notation
 
-fudge: notation "fudge"
+dice :  dice_notation "d" dice_notation
 
-DSEPARATOR: "d" | "D"
+fudge: dice_notation "fudge"
 
-number: SIGNED_NUMBER
-
+expected_value: "E" "[" dice_notation "]"
 
 %import common.ESCAPED_STRING
 %import common.SIGNED_NUMBER

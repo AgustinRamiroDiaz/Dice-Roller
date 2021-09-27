@@ -10,6 +10,10 @@
 - Go into the folder
 - Execute from the command line: `pip install -r requirements.txt`
 
+## Execution
+- Go into the folder
+- Execute from the command line: `python main.py`
+
 
 ## Useful resources:
 - [Dice notation on Wikipedia](https://en.wikipedia.org/wiki/Dice_notation)

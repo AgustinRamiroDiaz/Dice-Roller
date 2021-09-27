@@ -1,6 +1,6 @@
 from lark import Transformer
 import numpy as np
-
+from colorama import Fore
 
 def truncate(string, length):
     if len(string) > length:
@@ -36,8 +36,8 @@ class Evaluator(Transformer):
 
         mapping_dictionary = {-1: "-", 0: " ", 1: "+"}
 
-        print(truncate(
-            f"# Rolling {int(quantity)} fudge dices: {' + '.join(str([mapping_dictionary[key]]) for key in rolls)}", 100))
+        print(Fore.GREEN + truncate(
+            f"Rolling {int(quantity)} fudge dices: {' + '.join(str([mapping_dictionary[key]]) for key in rolls)}", 100))
 
         return rolls.sum()
 
@@ -46,37 +46,37 @@ class Evaluator(Transformer):
 
         if quantity < sum([value for (k, value) in keep]):
             raise ValueError(
-                "The maximum amount of dice you can keep is the quantity of the throw")
+                Fore.RED + "The maximum amount of dice you can keep is the quantity of the throw")
 
         # TODO: Extrapolate to negative and floating point numbers
         rolls = np.random.choice(int(number_of_faces), size=int(quantity)) + 1
 
-        print(truncate(
-            f"# Rolling {int(quantity)} {int(number_of_faces)}-sided dices: {' + '.join([str(roll) for roll in rolls])}", 100))
+        print(Fore.GREEN + truncate(
+            f"Rolling {int(quantity)} {int(number_of_faces)}-sided dices: {' + '.join([str(roll) for roll in rolls])}", 100))
 
         if keep:
             rolls_kept = np.array([])
             sorted_rolls_left = np.sort(rolls)
             for keep_key_word, amount in keep:
                 if keep_key_word == "keep highest":
-                    print(
+                    print(Fore.GREEN + 
                         f"Keeping the {amount} highest dice: {sorted_rolls_left[-amount:]}")
                     rolls_kept = np.concatenate(
                         (rolls_kept, sorted_rolls_left[-amount:]))
                     sorted_rolls_left = sorted_rolls_left[:-amount]
                 if keep_key_word == "keep lowest":
-                    print(
+                    print(Fore.GREEN + 
                         f"Keeping the {amount} lowest dice: {sorted_rolls_left[:amount]}")
                     rolls_kept = np.concatenate(
                         (rolls_kept, sorted_rolls_left[:amount]))
                     sorted_rolls_left = sorted_rolls_left[amount:]
                 if keep_key_word == "keep choice":
-                    choices = input(
+                    choices = input(Fore.YELLOW +
                         f"Choose the values you would like to keep from {list(sorted_rolls_left)} (write them separated by spaces): ")
                     choices_array = np.array([int(choice) for choice in choices.split()])
                     for choice in choices_array:
                         if choice not in sorted_rolls_left:
-                            raise ValueError(
+                            raise ValueError(Fore.RED +
                                 f"The value '{choice}' is not avaiable")
                         index = np.where(sorted_rolls_left == choice)[0][0]
                         sorted_rolls_left = np.delete(sorted_rolls_left, index)

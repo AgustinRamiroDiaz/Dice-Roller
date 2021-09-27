@@ -17,7 +17,13 @@ multiplication : dice_notation "*" dice_notation
 
 divition : dice_notation "/" dice_notation
 
-dice :  dice_notation "d" dice_notation
+dice :  dice_notation "d" dice_notation keep_highest? keep_lowest? keep_choice?
+
+keep_highest : "kh" dice_notation
+
+keep_lowest : "kl" dice_notation
+
+keep_choice: "kc" dice_notation
 
 fudge: dice_notation "df"
 

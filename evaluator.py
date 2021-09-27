@@ -1,6 +1,10 @@
 from lark import Transformer
 from numpy.random import choice
 
+def truncate(string, length):
+    if len(string) > length:
+        return string[:length] + ' ...'
+    return string
 
 class Evaluator(Transformer):
     def dice_notation(self, arguments):
@@ -30,7 +34,7 @@ class Evaluator(Transformer):
 
         mapping_dictionary = {-1: "-", 0: " ", 1: "+"}
 
-        print(f"# Rolling {int(quantity)} fudge dices: {' + '.join(str([mapping_dictionary[key]]) for key in rolls)}")
+        print(truncate(f"# Rolling {int(quantity)} fudge dices: {' + '.join(str([mapping_dictionary[key]]) for key in rolls)}", 100))
 
         return rolls.sum()
 
@@ -39,7 +43,7 @@ class Evaluator(Transformer):
         # TODO: Extrapolate to negative and floating point numbers
         rolls = choice(int(number_of_faces), size=int(quantity)) + 1
 
-        print(f"# Rolling {int(quantity)} {int(number_of_faces)}-sided dices: {' + '.join([str(roll) for roll in rolls])}")
+        print(truncate(f"# Rolling {int(quantity)} {int(number_of_faces)}-sided dices: {' + '.join([str(roll) for roll in rolls])}", 100))
 
         return rolls.sum()
 

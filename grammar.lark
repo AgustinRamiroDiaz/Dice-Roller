@@ -19,7 +19,7 @@ divition : dice_notation "/" dice_notation
 
 dice :  dice_notation "d" dice_notation
 
-fudge: dice_notation "fudge"
+fudge: dice_notation "df"
 
 expected_value: "E" "[" dice_notation "]"
 

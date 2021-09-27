@@ -1,4 +1,5 @@
 # %%
+from os import error
 from lark import Lark
 from evaluator import evaluator
 
@@ -15,6 +16,6 @@ while True:
     try:
         tree = parser.parse(text)
         print(f"Result: {evaluator.transform(tree)}")
-    except:
-        print("Can't parse expression")
+    except Exception as error:
+        print("Can't parse expression: " + str(error))
 

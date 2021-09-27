@@ -1,4 +1,5 @@
 dice_notation : 
+| CNAME "=" dice_notation -> variable_declaration
 | addition
 | subtraction
 | multiplication
@@ -8,6 +9,7 @@ dice_notation :
 | SIGNED_NUMBER -> number
 | "(" dice_notation ")"
 | expected_value
+| CNAME -> variable_search
 
 addition:  dice_notation "+" dice_notation
 
@@ -31,5 +33,6 @@ expected_value: "E" "[" dice_notation "]"
 
 %import common.ESCAPED_STRING
 %import common.SIGNED_NUMBER
+%import common.CNAME
 %import common.WS
 %ignore WS

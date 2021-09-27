@@ -10,6 +10,26 @@ def truncate(string, length):
 
 
 class Evaluator(Transformer):
+    variable_declarations = {}
+
+    def variable_declaration(self, arguments):
+        name, value = arguments
+
+        if name in self.variable_declarations:
+            print(Fore.GREEN +
+                  f"Redeclearing variable {name} from {self.variable_declarations[name]} to {value}")
+        else:
+            print(Fore.GREEN +
+                  f"Declearing variable {name} with value {value}")
+        self.variable_declarations[name] = value
+        return value
+
+    def variable_search(self, arguments):
+        (name, ) = arguments
+        if name not in self.variable_declarations:
+            raise ValueError(f"Variable {name} is not defined")
+        return self.variable_declarations[name]
+
     def dice_notation(self, arguments):
         (result,) = arguments
         return result

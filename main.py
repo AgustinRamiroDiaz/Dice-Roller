@@ -17,7 +17,7 @@ while True:
 
     try:
         tree = parser.parse(text)
-        print(Fore.LIGHTMAGENTA_EX + f"🎲 {evaluator.transform(tree)} 🎲")
+        print(Fore.LIGHTMAGENTA_EX + f"\n🎲 {evaluator.transform(tree)} 🎲", end="\n\n")
     except Exception as error:
         print(Fore.RED + "Can't parse expression: " + str(error))
 

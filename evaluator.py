@@ -2,6 +2,7 @@ from lark import Transformer
 import numpy as np
 from colorama import Fore
 
+
 def truncate(string, length):
     if len(string) > length:
         return string[:length] + ' ...'
@@ -28,6 +29,22 @@ class Evaluator(Transformer):
     def divition(self, arguments):
         left, right = arguments
         return left / right
+
+    def keep_highest(self, arguments):
+        (value,) = arguments
+        return "keep highest", int(value)
+
+    def keep_lowest(self, arguments):
+        (value,) = arguments
+        return "keep lowest", int(value)
+
+    def keep_choice(self, arguments):
+        (value,) = arguments
+        return "keep choice", int(value)
+
+    def number(self, arguments):
+        (value,) = arguments
+        return float(value)
 
     def fudge(self, arguments):
         (quantity, ) = arguments
@@ -59,25 +76,24 @@ class Evaluator(Transformer):
             sorted_rolls_left = np.sort(rolls)
             for keep_key_word, amount in keep:
                 if keep_key_word == "keep highest":
-                    print(Fore.GREEN + 
-                        f"Keeping the {amount} highest dice: {sorted_rolls_left[-amount:]}")
+                    print(Fore.GREEN +
+                          f"Keeping the {amount} highest dice: {sorted_rolls_left[-amount:]}")
                     rolls_kept = np.concatenate(
                         (rolls_kept, sorted_rolls_left[-amount:]))
                     sorted_rolls_left = sorted_rolls_left[:-amount]
                 if keep_key_word == "keep lowest":
-                    print(Fore.GREEN + 
-                        f"Keeping the {amount} lowest dice: {sorted_rolls_left[:amount]}")
+                    print(Fore.GREEN +
+                          f"Keeping the {amount} lowest dice: {sorted_rolls_left[:amount]}")
                     rolls_kept = np.concatenate(
                         (rolls_kept, sorted_rolls_left[:amount]))
                     sorted_rolls_left = sorted_rolls_left[amount:]
                 if keep_key_word == "keep choice":
-                    choices = input(Fore.YELLOW +
-                        f"Choose the values you would like to keep from {list(sorted_rolls_left)} (write them separated by spaces): ")
-                    choices_array = np.array([int(choice) for choice in choices.split()])
+                    choices_array = self._input_keep_choice_handler(
+                        sorted_rolls_left, amount)
                     for choice in choices_array:
                         if choice not in sorted_rolls_left:
                             raise ValueError(Fore.RED +
-                                f"The value '{choice}' is not avaiable")
+                                             f"The value '{choice}' is not avaiable")
                         index = np.where(sorted_rolls_left == choice)[0][0]
                         sorted_rolls_left = np.delete(sorted_rolls_left, index)
 
@@ -87,21 +103,22 @@ class Evaluator(Transformer):
 
         return rolls.sum()
 
-    def keep_highest(self, arguments):
-        (value,) = arguments
-        return "keep highest", int(value)
+    def _input_keep_choice_handler(self, sorted_rolls_left, amount):
+        choices = input(Fore.YELLOW +
+                        f"Choose {amount} dices you would like to keep from {list(sorted_rolls_left)} (write them separated by spaces): "
+                        + Fore.RESET)
+        choices_array = np.array(
+            [int(choice) for choice in choices.split()])
+        while len(choices_array) != amount:
+            print(
+                Fore.RED + f"Wrong amount of dice: your input amount was {len(choices_array)} but the expected was {amount}")
+            choices = input(Fore.YELLOW +
+                            f"Choose {amount} dices you would like to keep from {list(sorted_rolls_left)} (write them separated by spaces): "
+                            + Fore.RESET)
+            choices_array = np.array(
+                [int(choice) for choice in choices.split()])
 
-    def keep_lowest(self, arguments):
-        (value,) = arguments
-        return "keep lowest", int(value)
-
-    def keep_choice(self, arguments):
-        (value,) = arguments
-        return "keep choice", int(value)
-
-    def number(self, arguments):
-        (value,) = arguments
-        return float(value)
+        return choices_array
 
 
 evaluator = Evaluator()

@@ -14,7 +14,7 @@ while True:
     
     try:
         tree = parser.parse(text)
-        print(evaluator.transform(tree))
+        print(f"Result: {evaluator.transform(tree)}")
     except:
         print("Can't parse expression")
 

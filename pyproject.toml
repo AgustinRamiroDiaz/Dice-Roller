@@ -9,6 +9,11 @@ dependencies = [
     "numpy==2.5.1",
 ]
 
+[dependency-groups]
+dev = [
+    "pre-commit==4.3.0",
+]
+
 [project.optional-dependencies]
 cli = [
     "colorama==0.4.6",

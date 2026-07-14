@@ -11,6 +11,11 @@
 - Go into the folder
 - Execute from the command line: `uv sync`
 
+## Development
+- Install the development dependencies: `uv sync --dev`
+- Install the Git hooks: `uv run pre-commit install`
+- Run all hooks manually: `uv run pre-commit run --all-files`
+
 ## Library usage
 ```python
 from dice_roller import Evaluator, evaluate, parse, parser, simulate

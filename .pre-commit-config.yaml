@@ -7,3 +7,8 @@ repos:
         language: system
         pass_filenames: false
         always_run: true
+      - id: mypy
+        name: mypy
+        entry: uv run mypy
+        language: system
+        pass_filenames: false

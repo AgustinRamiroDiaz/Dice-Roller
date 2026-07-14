@@ -6,7 +6,7 @@ from concurrent.futures import Future
 
 import numpy as np
 
-from .evaluator import KeepChoiceHandler, TraceCallback
+from .evaluator import DiceRolls, KeepChoiceHandler, TraceCallback
 from .evaluator import Evaluator
 from .simulation import evaluate
 
@@ -77,7 +77,7 @@ class KeepChoiceScreen(ModalScreen[list[int] | None]):
         ("enter", "confirm", "Keep selected"),
     ]
 
-    def __init__(self, rolls: np.ndarray, amount: int) -> None:
+    def __init__(self, rolls: DiceRolls, amount: int) -> None:
         super().__init__()
         self._rolls = [int(roll) for roll in rolls]
         self._amount = amount
@@ -129,7 +129,7 @@ class KeepChoiceScreen(ModalScreen[list[int] | None]):
         self.dismiss([value for (_index, value) in selected])
 
 
-class DiceRollerTui(App):
+class DiceRollerTui(App[None]):
     CSS = """
     Screen {
         layout: vertical;
@@ -299,7 +299,7 @@ class DiceRollerTui(App):
     def _write_trace_on_app_thread(self, message: str) -> None:
         self.query_one("#trace", RichLog).write(message)
 
-    def _choose_keep_dice(self, sorted_rolls_left: np.ndarray, amount: int) -> np.ndarray:
+    def _choose_keep_dice(self, sorted_rolls_left: DiceRolls, amount: int) -> DiceRolls:
         selection: Future[list[int] | None] = Future()
 
         def show_picker() -> None:
@@ -314,7 +314,7 @@ class DiceRollerTui(App):
             raise ValueError("keep choice selection was cancelled")
         return np.array(choices)
 
-    def _evaluate_notation(self, notation: str):
+    def _evaluate_notation(self, notation: str) -> float:
         return evaluate(notation, evaluator=self._require_evaluator())
 
     def _load_history_item(self) -> None:

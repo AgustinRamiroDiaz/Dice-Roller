@@ -29,16 +29,14 @@ To trace evaluation steps or handle keep-choice notation, pass callbacks to
 `Evaluator`:
 
 ```python
-import numpy as np
-
-from dice_roller import Evaluator, KeepChoiceHandler, TraceCallback, evaluate
+from dice_roller import DiceRolls, Evaluator, KeepChoiceHandler, TraceCallback, evaluate
 
 
 def trace(message: str) -> None:
     print(message)
 
 
-def keep_choice_handler(sorted_rolls_left: np.ndarray, amount: int) -> np.ndarray:
+def keep_choice_handler(sorted_rolls_left: DiceRolls, amount: int) -> DiceRolls:
     return sorted_rolls_left[:amount]
 
 

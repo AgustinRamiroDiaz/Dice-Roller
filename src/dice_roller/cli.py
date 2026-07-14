@@ -1,6 +1,6 @@
 import numpy as np
 
-from .evaluator import Evaluator
+from .evaluator import DiceRolls, Evaluator
 from .simulation import evaluate
 
 try:
@@ -16,7 +16,7 @@ def _trace(message: str) -> None:
     print(Fore.GREEN + message + Fore.RESET)
 
 
-def _input_keep_choice_handler(sorted_rolls_left, amount):
+def _input_keep_choice_handler(sorted_rolls_left: DiceRolls, amount: int) -> DiceRolls:
     choices = input(
         Fore.YELLOW
         + f"Choose {amount} dices you would like to keep from {list(sorted_rolls_left)} "

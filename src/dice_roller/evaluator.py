@@ -3,10 +3,15 @@ from typing import Any
 
 from lark import Transformer
 import numpy as np
+import numpy.typing as npt
 
 
+DiceRolls = npt.NDArray[Any]
 TraceCallback = Callable[[str], None]
-KeepChoiceHandler = Callable[[np.ndarray, int], np.ndarray]
+KeepChoiceHandler = Callable[[DiceRolls, int], DiceRolls]
+KeepModifier = tuple[str, int]
+TransformResult = float | KeepModifier
+type DiceArguments = tuple[float, float, *tuple[KeepModifier, ...]]
 
 
 def truncate(string: str, length: int) -> str:
@@ -15,7 +20,7 @@ def truncate(string: str, length: int) -> str:
     return string
 
 
-class Evaluator(Transformer):
+class Evaluator(Transformer[Any, float]):
     def __init__(
         self,
         *,
@@ -47,7 +52,7 @@ class Evaluator(Transformer):
         if self._trace is not None:
             self._trace(message)
 
-    def variable_declaration(self, arguments):
+    def variable_declaration(self, arguments: list[Any]) -> float:
         name, value = arguments
 
         if name in self.variable_declarations:
@@ -56,52 +61,53 @@ class Evaluator(Transformer):
             )
         else:
             self._emit(f"Declaring variable {name} with value {value}")
-        self.variable_declarations[name] = value
-        return value
+        numeric_value = float(value)
+        self.variable_declarations[name] = numeric_value
+        return numeric_value
 
-    def variable_search(self, arguments):
+    def variable_search(self, arguments: list[Any]) -> float:
         (name,) = arguments
         if name not in self.variable_declarations:
             raise ValueError(f"Variable {name} is not defined")
         return self.variable_declarations[name]
 
-    def dice_notation(self, arguments):
+    def dice_notation(self, arguments: list[TransformResult]) -> TransformResult:
         (result,) = arguments
         return result
 
-    def addition(self, arguments):
+    def addition(self, arguments: list[float]) -> float:
         left, right = arguments
         return left + right
 
-    def subtraction(self, arguments):
+    def subtraction(self, arguments: list[float]) -> float:
         left, right = arguments
         return left - right
 
-    def multiplication(self, arguments):
+    def multiplication(self, arguments: list[float]) -> float:
         left, right = arguments
         return left * right
 
-    def divition(self, arguments):
+    def divition(self, arguments: list[float]) -> float:
         left, right = arguments
         return left / right
 
-    def keep_highest(self, arguments):
+    def keep_highest(self, arguments: list[float]) -> KeepModifier:
         (value,) = arguments
         return "keep highest", int(value)
 
-    def keep_lowest(self, arguments):
+    def keep_lowest(self, arguments: list[float]) -> KeepModifier:
         (value,) = arguments
         return "keep lowest", int(value)
 
-    def keep_choice(self, arguments):
+    def keep_choice(self, arguments: list[float]) -> KeepModifier:
         (value,) = arguments
         return "keep choice", int(value)
 
-    def number(self, arguments):
+    def number(self, arguments: list[str]) -> float:
         (value,) = arguments
         return float(value)
 
-    def fudge(self, arguments):
+    def fudge(self, arguments: list[float]) -> float:
         (quantity,) = arguments
         rolls = np.random.choice([-1, 0, 1], size=int(quantity))
 
@@ -115,12 +121,12 @@ class Evaluator(Transformer):
             )
         )
 
-        return rolls.sum()
+        return float(rolls.sum())
 
-    def dice(self, arguments):
+    def dice(self, arguments: DiceArguments) -> float:
         quantity, number_of_faces, *keep = arguments
 
-        if quantity < sum([value for (_keyword, value) in keep]):
+        if quantity < sum(value for (_keyword, value) in keep):
             raise ValueError(
                 "The maximum amount of dice you can keep is the quantity of the throw"
             )
@@ -163,14 +169,16 @@ class Evaluator(Transformer):
 
                     rolls_kept = np.concatenate((rolls_kept, choices_array))
 
-            return rolls_kept.sum()
+            return float(rolls_kept.sum())
 
-        return rolls.sum()
+        return float(rolls.sum())
 
-    def expected_value(self, _arguments):
+    def expected_value(self, _arguments: list[Any]) -> None:
         raise NotImplementedError("Expected value notation is not implemented")
 
-    def _input_keep_choice_handler(self, sorted_rolls_left, amount):
+    def _input_keep_choice_handler(
+        self, sorted_rolls_left: DiceRolls, amount: int
+    ) -> DiceRolls:
         if self._keep_choice_handler is None:
             raise ValueError("keep choice notation requires a keep_choice_handler")
         return self._keep_choice_handler(sorted_rolls_left, amount)

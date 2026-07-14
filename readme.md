@@ -22,6 +22,7 @@ value = Evaluator().transform(tree)
 
 ## Execution
 - Go into the folder
+- Install the CLI extra: `uv sync --extra cli`
 - Execute from the command line: `uv run dice-roller`
 
 

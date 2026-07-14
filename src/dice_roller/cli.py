@@ -1,8 +1,15 @@
-from colorama import Fore
 import numpy as np
 
 from .evaluator import Evaluator
 from .simulation import evaluate
+
+try:
+    from colorama import Fore
+except ImportError as error:
+    raise SystemExit(
+        "The dice-roller CLI requires the optional 'cli' extra. "
+        "Install it with: uv sync --extra cli"
+    ) from error
 
 
 def _trace(message: str) -> None:

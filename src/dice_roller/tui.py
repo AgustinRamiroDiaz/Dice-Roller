@@ -70,6 +70,8 @@ class DiceRollerTui(App):
     BINDINGS = [
         ("ctrl+c", "quit", "Quit"),
         ("ctrl+l", "clear", "Clear"),
+        ("up", "history_previous", "Previous roll"),
+        ("down", "history_next", "Next roll"),
     ]
 
     TITLE = "Dice Roller"
@@ -83,6 +85,8 @@ class DiceRollerTui(App):
         super().__init__()
         self._evaluator_factory = evaluator_factory or self._default_evaluator_factory
         self._evaluator: Evaluator | None = None
+        self._history: list[str] = []
+        self._history_index: int | None = None
 
     def compose(self) -> ComposeResult:
         yield Header()
@@ -111,6 +115,9 @@ class DiceRollerTui(App):
         if not notation:
             return
 
+        self._history.append(notation)
+        self._history_index = None
+
         result_widget = self.query_one("#result", Static)
         history = self.query_one("#history", RichLog)
         trace = self.query_one("#trace", RichLog)
@@ -133,9 +140,45 @@ class DiceRollerTui(App):
         self.query_one("#result", Static).update("Result appears here")
         self.query_one("#history", RichLog).clear()
         self.query_one("#trace", RichLog).clear()
+        self._history.clear()
+        self._history_index = None
+
+    def action_history_previous(self) -> None:
+        if not self._history:
+            return
+
+        if self._history_index is None:
+            self._history_index = len(self._history) - 1
+        else:
+            self._history_index = max(0, self._history_index - 1)
+
+        self._load_history_item()
+
+    def action_history_next(self) -> None:
+        if self._history_index is None:
+            return
+
+        if self._history_index >= len(self._history) - 1:
+            self._history_index = None
+            self._set_notation("")
+            return
+
+        self._history_index += 1
+        self._load_history_item()
 
     def _write_trace(self, message: str) -> None:
         self.query_one("#trace", RichLog).write(message)
+
+    def _load_history_item(self) -> None:
+        if self._history_index is None:
+            return
+        self._set_notation(self._history[self._history_index])
+
+    def _set_notation(self, notation: str) -> None:
+        input_widget = self.query_one("#notation", Input)
+        input_widget.value = notation
+        input_widget.cursor_position = len(notation)
+        input_widget.focus()
 
     def _require_evaluator(self) -> Evaluator:
         if self._evaluator is None:

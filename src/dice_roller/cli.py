@@ -1,6 +1,6 @@
 import numpy as np
 
-from .evaluator import DiceRolls, Evaluator
+from .evaluator import DiceRolls, Evaluator, format_rolls
 from .simulation import evaluate
 
 try:
@@ -19,7 +19,7 @@ def _trace(message: str) -> None:
 def _input_keep_choice_handler(sorted_rolls_left: DiceRolls, amount: int) -> DiceRolls:
     choices = input(
         Fore.YELLOW
-        + f"Choose {amount} dices you would like to keep from {list(sorted_rolls_left)} "
+        + f"Choose {amount} dices you would like to keep from {format_rolls(sorted_rolls_left)} "
         + "(write them separated by spaces): "
         + Fore.RESET
     )
@@ -33,7 +33,7 @@ def _input_keep_choice_handler(sorted_rolls_left: DiceRolls, amount: int) -> Dic
         )
         choices = input(
             Fore.YELLOW
-            + f"Choose {amount} dices you would like to keep from {list(sorted_rolls_left)} "
+            + f"Choose {amount} dices you would like to keep from {format_rolls(sorted_rolls_left)} "
             + "(write them separated by spaces): "
             + Fore.RESET
         )

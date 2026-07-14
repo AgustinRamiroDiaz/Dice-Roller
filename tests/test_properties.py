@@ -7,7 +7,7 @@ from hypothesis import given
 from hypothesis import strategies as st
 import numpy as np
 
-from dice_roller import evaluate, parse
+from dice_roller import Evaluator, evaluate, parse
 
 
 small_numbers = st.integers(min_value=0, max_value=1_000)
@@ -88,3 +88,14 @@ def test_keep_lowest_sums_the_smallest_rolls(
 @given(quantity=dice_quantities, faces=dice_faces)
 def test_generated_dice_notation_is_parseable(quantity: int, faces: int) -> None:
     assert parse(f"{quantity}d{faces}") is not None
+
+
+def test_roll_trace_formats_numpy_scalars_as_plain_numbers() -> None:
+    messages: list[str] = []
+
+    with _use_predictable_rolls():
+        evaluate("10d6", evaluator=Evaluator(trace=messages.append))
+
+    assert messages == [
+        "Rolling 10 6-sided dices: [1, 2, 3, 4, 5, 6, 1, 2, 3, 4]"
+    ]

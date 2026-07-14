@@ -14,10 +14,8 @@ TransformResult = float | KeepModifier
 type DiceArguments = tuple[float, float, *tuple[KeepModifier, ...]]
 
 
-def truncate(string: str, length: int) -> str:
-    if len(string) > length:
-        return string[:length] + " ..."
-    return string
+def format_rolls(rolls: DiceRolls) -> list[Any]:
+    return [roll.item() for roll in rolls]
 
 
 class Evaluator(Transformer[Any, float]):
@@ -114,11 +112,8 @@ class Evaluator(Transformer[Any, float]):
         mapping_dictionary = {-1: "-", 0: " ", 1: "+"}
 
         self._emit(
-            truncate(
-                f"Rolling {int(quantity)} fudge dices: "
-                f"{' '.join([f'[{mapping_dictionary[key]}]' for key in rolls])}",
-                100,
-            )
+            f"Rolling {int(quantity)} fudge dices: "
+            f"{' '.join([f'[{mapping_dictionary[key]}]' for key in rolls])}"
         )
 
         return float(rolls.sum())
@@ -134,11 +129,8 @@ class Evaluator(Transformer[Any, float]):
         rolls = np.random.choice(int(number_of_faces), size=int(quantity)) + 1
 
         self._emit(
-            truncate(
-                f"Rolling {int(quantity)} {int(number_of_faces)}-sided dices: "
-                f"{[roll for roll in rolls]}",
-                100,
-            )
+            f"Rolling {int(quantity)} {int(number_of_faces)}-sided dices: "
+            f"{format_rolls(rolls)}"
         )
 
         if keep:
@@ -147,13 +139,15 @@ class Evaluator(Transformer[Any, float]):
             for keep_key_word, amount in keep:
                 if keep_key_word == "keep highest":
                     self._emit(
-                        f"Keeping the {amount} highest dice: {sorted_rolls_left[-amount:]}"
+                        f"Keeping the {amount} highest dice: "
+                        f"{format_rolls(sorted_rolls_left[-amount:])}"
                     )
                     rolls_kept = np.concatenate((rolls_kept, sorted_rolls_left[-amount:]))
                     sorted_rolls_left = sorted_rolls_left[:-amount]
                 if keep_key_word == "keep lowest":
                     self._emit(
-                        f"Keeping the {amount} lowest dice: {sorted_rolls_left[:amount]}"
+                        f"Keeping the {amount} lowest dice: "
+                        f"{format_rolls(sorted_rolls_left[:amount])}"
                     )
                     rolls_kept = np.concatenate((rolls_kept, sorted_rolls_left[:amount]))
                     sorted_rolls_left = sorted_rolls_left[amount:]

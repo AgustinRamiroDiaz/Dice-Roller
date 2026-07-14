@@ -103,6 +103,9 @@ evaluator.trace = None
 evaluator.keep_choice_handler = choice_handler
 ```
 
+Trace messages are emitted in full. If you want shorter trace output, truncate
+or format messages inside your `TraceCallback`.
+
 ## Known limitations
 Negative number literals are not handled correctly yet. For example, `-1` is
 currently parsed as subtraction with a missing left-hand operand, so evaluating

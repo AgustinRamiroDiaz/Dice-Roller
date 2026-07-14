@@ -27,6 +27,22 @@ class Evaluator(Transformer):
         self._trace = trace
         self._keep_choice_handler = keep_choice_handler
 
+    @property
+    def trace(self) -> TraceCallback | None:
+        return self._trace
+
+    @trace.setter
+    def trace(self, callback: TraceCallback | None) -> None:
+        self._trace = callback
+
+    @property
+    def keep_choice_handler(self) -> KeepChoiceHandler | None:
+        return self._keep_choice_handler
+
+    @keep_choice_handler.setter
+    def keep_choice_handler(self, handler: KeepChoiceHandler | None) -> None:
+        self._keep_choice_handler = handler
+
     def _emit(self, message: str) -> None:
         if self._trace is not None:
             self._trace(message)

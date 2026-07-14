@@ -25,6 +25,36 @@ tree = parse("4d6kh3")
 value = Evaluator().transform(tree)
 ```
 
+To trace evaluation steps or handle keep-choice notation, pass callbacks to
+`Evaluator`:
+
+```python
+import numpy as np
+
+from dice_roller import Evaluator, KeepChoiceHandler, TraceCallback, evaluate
+
+
+def trace(message: str) -> None:
+    print(message)
+
+
+def keep_choice_handler(sorted_rolls_left: np.ndarray, amount: int) -> np.ndarray:
+    return sorted_rolls_left[:amount]
+
+
+trace_callback: TraceCallback = trace
+choice_handler: KeepChoiceHandler = keep_choice_handler
+
+evaluator = Evaluator(
+    trace=trace_callback,
+    keep_choice_handler=choice_handler,
+)
+value = evaluate("4d6kc2", evaluator=evaluator)
+
+evaluator.trace = None
+evaluator.keep_choice_handler = choice_handler
+```
+
 ## Execution
 - Go into the folder
 - Install the CLI extra: `uv sync --extra cli`

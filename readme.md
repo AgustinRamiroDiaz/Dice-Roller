@@ -2,17 +2,27 @@
 
 
 ## Prerequisites
-- Python3
+- Python 3.11+
+- uv
 
 
 ## Installation
 - Clone the repo
 - Go into the folder
-- Execute from the command line: `pip install -r requirements.txt`
+- Execute from the command line: `uv sync`
+
+## Library usage
+```python
+from dice_roller import Evaluator, evaluate, parse, parser, simulate
+
+result = simulate("2d6 + 3")
+tree = parse("4d6kh3")
+value = Evaluator().transform(tree)
+```
 
 ## Execution
 - Go into the folder
-- Execute from the command line: `python main.py`
+- Execute from the command line: `uv run dice-roller`
 
 
 ## Useful resources:

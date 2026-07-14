@@ -1,31 +1,50 @@
+from collections.abc import Callable
+from typing import Any
+
 from lark import Transformer
 import numpy as np
-from colorama import Fore
 
 
-def truncate(string, length):
+TraceCallback = Callable[[str], None]
+KeepChoiceHandler = Callable[[np.ndarray, int], np.ndarray]
+
+
+def truncate(string: str, length: int) -> str:
     if len(string) > length:
-        return string[:length] + ' ...'
+        return string[:length] + " ..."
     return string
 
 
 class Evaluator(Transformer):
-    variable_declarations = {}
+    def __init__(
+        self,
+        *,
+        trace: TraceCallback | None = None,
+        keep_choice_handler: KeepChoiceHandler | None = None,
+    ) -> None:
+        super().__init__()
+        self.variable_declarations: dict[Any, float] = {}
+        self._trace = trace
+        self._keep_choice_handler = keep_choice_handler
+
+    def _emit(self, message: str) -> None:
+        if self._trace is not None:
+            self._trace(message)
 
     def variable_declaration(self, arguments):
         name, value = arguments
 
         if name in self.variable_declarations:
-            print(Fore.GREEN +
-                  f"Redeclearing variable {name} from {self.variable_declarations[name]} to {value}")
+            self._emit(
+                f"Redeclaring variable {name} from {self.variable_declarations[name]} to {value}"
+            )
         else:
-            print(Fore.GREEN +
-                  f"Declearing variable {name} with value {value}")
+            self._emit(f"Declaring variable {name} with value {value}")
         self.variable_declarations[name] = value
         return value
 
     def variable_search(self, arguments):
-        (name, ) = arguments
+        (name,) = arguments
         if name not in self.variable_declarations:
             raise ValueError(f"Variable {name} is not defined")
         return self.variable_declarations[name]
@@ -67,53 +86,62 @@ class Evaluator(Transformer):
         return float(value)
 
     def fudge(self, arguments):
-        (quantity, ) = arguments
-        # TODO: Extrapolate to negative and floating point numbers
+        (quantity,) = arguments
         rolls = np.random.choice([-1, 0, 1], size=int(quantity))
 
         mapping_dictionary = {-1: "-", 0: " ", 1: "+"}
 
-        print(Fore.GREEN + truncate(
-            f"Rolling {int(quantity)} fudge dices: {' '.join([f'[{mapping_dictionary[key]}]' for key in rolls])}", 100))
+        self._emit(
+            truncate(
+                f"Rolling {int(quantity)} fudge dices: "
+                f"{' '.join([f'[{mapping_dictionary[key]}]' for key in rolls])}",
+                100,
+            )
+        )
 
         return rolls.sum()
 
     def dice(self, arguments):
         quantity, number_of_faces, *keep = arguments
 
-        if quantity < sum([value for (k, value) in keep]):
+        if quantity < sum([value for (_keyword, value) in keep]):
             raise ValueError(
-                Fore.RED + "The maximum amount of dice you can keep is the quantity of the throw")
+                "The maximum amount of dice you can keep is the quantity of the throw"
+            )
 
-        # TODO: Extrapolate to negative and floating point numbers
         rolls = np.random.choice(int(number_of_faces), size=int(quantity)) + 1
 
-        print(Fore.GREEN + truncate(
-            f"Rolling {int(quantity)} {int(number_of_faces)}-sided dices: {[roll for roll in rolls]}", 100))
+        self._emit(
+            truncate(
+                f"Rolling {int(quantity)} {int(number_of_faces)}-sided dices: "
+                f"{[roll for roll in rolls]}",
+                100,
+            )
+        )
 
         if keep:
             rolls_kept = np.array([])
             sorted_rolls_left = np.sort(rolls)
             for keep_key_word, amount in keep:
                 if keep_key_word == "keep highest":
-                    print(Fore.GREEN +
-                          f"Keeping the {amount} highest dice: {sorted_rolls_left[-amount:]}")
-                    rolls_kept = np.concatenate(
-                        (rolls_kept, sorted_rolls_left[-amount:]))
+                    self._emit(
+                        f"Keeping the {amount} highest dice: {sorted_rolls_left[-amount:]}"
+                    )
+                    rolls_kept = np.concatenate((rolls_kept, sorted_rolls_left[-amount:]))
                     sorted_rolls_left = sorted_rolls_left[:-amount]
                 if keep_key_word == "keep lowest":
-                    print(Fore.GREEN +
-                          f"Keeping the {amount} lowest dice: {sorted_rolls_left[:amount]}")
-                    rolls_kept = np.concatenate(
-                        (rolls_kept, sorted_rolls_left[:amount]))
+                    self._emit(
+                        f"Keeping the {amount} lowest dice: {sorted_rolls_left[:amount]}"
+                    )
+                    rolls_kept = np.concatenate((rolls_kept, sorted_rolls_left[:amount]))
                     sorted_rolls_left = sorted_rolls_left[amount:]
                 if keep_key_word == "keep choice":
                     choices_array = self._input_keep_choice_handler(
-                        sorted_rolls_left, amount)
+                        sorted_rolls_left, amount
+                    )
                     for choice in choices_array:
                         if choice not in sorted_rolls_left:
-                            raise ValueError(Fore.RED +
-                                             f"The value '{choice}' is not avaiable")
+                            raise ValueError(f"The value '{choice}' is not available")
                         index = np.where(sorted_rolls_left == choice)[0][0]
                         sorted_rolls_left = np.delete(sorted_rolls_left, index)
 
@@ -123,22 +151,10 @@ class Evaluator(Transformer):
 
         return rolls.sum()
 
+    def expected_value(self, _arguments):
+        raise NotImplementedError("Expected value notation is not implemented")
+
     def _input_keep_choice_handler(self, sorted_rolls_left, amount):
-        choices = input(Fore.YELLOW +
-                        f"Choose {amount} dices you would like to keep from {list(sorted_rolls_left)} (write them separated by spaces): "
-                        + Fore.RESET)
-        choices_array = np.array(
-            [int(choice) for choice in choices.split()])
-        while len(choices_array) != amount:
-            print(
-                Fore.RED + f"Wrong amount of dice: your input amount was {len(choices_array)} but the expected was {amount}")
-            choices = input(Fore.YELLOW +
-                            f"Choose {amount} dices you would like to keep from {list(sorted_rolls_left)} (write them separated by spaces): "
-                            + Fore.RESET)
-            choices_array = np.array(
-                [int(choice) for choice in choices.split()])
-
-        return choices_array
-
-
-evaluator = Evaluator()
+        if self._keep_choice_handler is None:
+            raise ValueError("keep choice notation requires a keep_choice_handler")
+        return self._keep_choice_handler(sorted_rolls_left, amount)

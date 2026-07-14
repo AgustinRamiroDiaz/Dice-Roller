@@ -1,23 +1,5 @@
-# %%
-from os import error
-from lark import Lark
-from evaluator import evaluator
-from colorama import Fore
+from dice_roller.cli import main
 
 
-with open("grammar.lark", "r") as file:
-    grammar = "\n".join(file.readlines())
-
-parser = Lark(grammar, start='dice_notation')
-
-# %%
-
-while True:
-    text = input(Fore.LIGHTYELLOW_EX + "Type in an expression in dice notation: \n" + Fore.RESET)
-
-    try:
-        tree = parser.parse(text)
-        print(Fore.LIGHTMAGENTA_EX + f"\n🎲 {evaluator.transform(tree)} 🎲", end="\n\n")
-    except Exception as error:
-        print(Fore.RED + "Can't parse expression: " + str(error))
-
+if __name__ == "__main__":
+    main()

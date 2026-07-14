@@ -18,9 +18,13 @@ dev = [
 cli = [
     "colorama==0.4.6",
 ]
+tui = [
+    "textual==8.2.5",
+]
 
 [project.scripts]
 dice-roller = "dice_roller.cli:main"
+dice-roller-tui = "dice_roller.tui:main"
 
 [build-system]
 requires = ["uv_build==0.11.17"]

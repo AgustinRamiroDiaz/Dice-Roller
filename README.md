@@ -30,6 +30,10 @@ value = Evaluator().transform(tree)
 - Install the CLI extra: `uv sync --extra cli`
 - Execute from the command line: `uv run dice-roller`
 
+## TUI
+- Install the TUI extra: `uv sync --extra tui`
+- Execute from the command line: `uv run dice-roller-tui`
+
 
 ## Useful resources:
 - [Dice notation on Wikipedia](https://en.wikipedia.org/wiki/Dice_notation)

@@ -208,14 +208,14 @@ class DiceRollerTui(App[None]):
         yield Header()
         with Horizontal(id="workspace"):
             with Vertical(id="left-pane"):
+                yield Static("History", classes="label")
+                yield RichLog(id="history", wrap=True, markup=True)
                 yield Static("Dice notation", classes="label")
                 yield Input(
                     placeholder="Try 2d6 + 3, 4d6kh3, or x = 1d20",
                     id="notation",
                 )
                 yield Static("Result appears here", id="result")
-                yield Static("History", classes="label")
-                yield RichLog(id="history", wrap=True, markup=True)
             with Vertical(id="right-pane"):
                 yield Static("Trace", classes="label")
                 yield RichLog(id="trace", wrap=True, markup=True)
